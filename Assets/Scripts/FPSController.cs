@@ -29,6 +29,8 @@ public class FPSController : MonoBehaviour
     {
         cameraRot = cam.transform.localRotation;
         characterRot = transform.localRotation;
+
+        GameState.canShoot = true;
     }
 
     // アップデートでマウスの入力を受け取り、その動きをカメラに反映
@@ -50,9 +52,11 @@ public class FPSController : MonoBehaviour
         UpdeateCursorLock ();
 
         // 射撃・リロード・歩き・走り
-        if (Input.GetMouseButton(0))
+        // 動画6で条件追加
+        if (Input.GetMouseButton(0) && GameState.canShoot)
         {
             animator.SetTrigger("Fire");
+            GameState.canShoot = false;
         }
 
         if (Input.GetKeyDown(KeyCode.R))
