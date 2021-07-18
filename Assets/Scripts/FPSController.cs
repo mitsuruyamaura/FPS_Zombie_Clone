@@ -22,6 +22,9 @@ public class FPSController : MonoBehaviour
     // 変数の宣言(角度の制限用）
     float minX = -90f, maxX = 90f;
 
+    // 変数の宣言(アニメーション用)
+    public Animator animator;
+
     void Start()
     {
         cameraRot = cam.transform.localRotation;
@@ -29,6 +32,7 @@ public class FPSController : MonoBehaviour
     }
 
     // アップデートでマウスの入力を受け取り、その動きをカメラに反映
+    // アップデートで各ボタンの入力を確認したらアニメーション遷移
     void Update()
     {
         float xRot = Input.GetAxis("Mouse X") * Ysensityvity;
@@ -44,6 +48,45 @@ public class FPSController : MonoBehaviour
 
         // 作成した関数をUpdateで呼び出す
         UpdeateCursorLock ();
+
+        // 射撃・リロード・歩き・走り
+        if (Input.GetMouseButton(0))
+        {
+            animator.SetTrigger("Fire");
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            animator.SetTrigger("Reload");
+        }
+
+        if (Mathf.Abs(x) > 0 || Mathf.Abs(z) > 0)
+        {
+            if (!animator.GetBool("Walk"))
+            {
+                animator.SetBool("Walk", true);
+            }
+        }
+        else if (animator.GetBool("Walk"))
+        {
+            animator.SetBool("Walk", false);
+        }
+
+        if (z > 0 && Input.GetKey(KeyCode.LeftShift))
+        {
+            if (!animator.GetBool("Run"))
+            {
+                animator.SetBool("Run", true);
+                speed = 0.25f;
+            }
+        }
+        else if (animator.GetBool("Run"))
+        {
+            animator.SetBool("Run", false);
+            speed = 0.1f;
+        }
+
+
     }
 
     // 入力に合わせてプレイヤーの位置を変更していく
