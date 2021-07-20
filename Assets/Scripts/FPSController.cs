@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class FPSController : MonoBehaviour
 {
@@ -25,12 +26,28 @@ public class FPSController : MonoBehaviour
     // 変数の宣言(アニメーション用)
     public Animator animator;
 
+    // 変数の宣言(所持弾薬、最高所持弾薬、マガジンないの弾数、マガジン内の最大数)
+    int ammunition = 50, maxAmmunition = 50, ammoClip = 10, maxAmmoClip =10;
+
+    // 変数の宣言(体力、Max体力、体力バー、弾薬テキスト)
+    int playerHP = 100, maxPlayerHP = 100;
+    public Slider hpBer;
+    public Text ammoText;
+
+    // 変数(カメラの取得)
+    public GameObject meinCamera, subCamera;
+
+    // スタート時に体力を体力バーに反映
+    // リロードと弾薬の所でテキストを反映する
     void Start()
     {
         cameraRot = cam.transform.localRotation;
         characterRot = transform.localRotation;
 
         GameState.canShoot = true;
+
+        hpBer.value = playerHP;
+        ammoText.text = ammoClip + "/" + ammunition;
     }
 
     // アップデートでマウスの入力を受け取り、その動きをカメラに反映
@@ -55,13 +72,38 @@ public class FPSController : MonoBehaviour
         // 動画6で条件追加
         if (Input.GetMouseButton(0) && GameState.canShoot)
         {
-            animator.SetTrigger("Fire");
-            GameState.canShoot = false;
+            // 射撃とリロードの所にコード追加
+            // リロードと弾薬の所でテキストを反映する
+            if (ammoClip > 0)
+            {
+                animator.SetTrigger("Fire");
+                GameState.canShoot = false;
+
+                ammoClip--;
+                ammoText.text = ammoClip + "/" + ammunition;
+            }
+            else
+            {
+                Debug.Log("弾が不足している");
+            }
         }
 
+        // リロードと弾薬の所でテキストを反映する
         if (Input.GetKeyDown(KeyCode.R))
         {
-            animator.SetTrigger("Reload");
+            int amountNeed = maxAmmoClip - ammoClip;
+            int ammoAvailable = amountNeed < ammunition ? amountNeed : ammunition;
+
+            if (amountNeed != 0 && ammunition != 0)
+            {
+                animator.SetTrigger("Reload");
+
+                ammunition -= ammoAvailable;
+                ammoClip += ammoAvailable;
+                ammoText.text = ammoClip + "/" + ammunition;
+            }
+
+            
         }
 
         if (Mathf.Abs(x) > 0 || Mathf.Abs(z) > 0)
@@ -90,7 +132,17 @@ public class FPSController : MonoBehaviour
             speed = 0.1f;
         }
 
-
+        // アップデートで右クリック検知してカメラを切り替える
+        if (Input.GetMouseButton(1))
+        {
+            subCamera.SetActive(true);
+            meinCamera.GetComponent<Camera>().enabled = false;
+        }
+        else if (subCamera.activeSelf)
+        {
+            subCamera.SetActive(false);
+            meinCamera.GetComponent<Camera>().enabled = true;
+        }
     }
 
     // 入力に合わせてプレイヤーの位置を変更していく
