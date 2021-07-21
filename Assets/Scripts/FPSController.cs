@@ -37,6 +37,11 @@ public class FPSController : MonoBehaviour
     // 変数(カメラの取得)
     public GameObject meinCamera, subCamera;
 
+    // FPSController
+    // 変数作成(スピーカー、音源)
+    public AudioSource playerFootStep;
+    public AudioClip WalkFootStepSE, RunFootStepSE;
+
     // スタート時に体力を体力バーに反映
     // リロードと弾薬の所でテキストを反映する
     void Start()
@@ -84,7 +89,9 @@ public class FPSController : MonoBehaviour
             }
             else
             {
-                Debug.Log("弾が不足している");
+                //Debug.Log("弾が不足している");
+
+                Weapon.instance.TriggerSE();
             }
         }
 
@@ -111,11 +118,16 @@ public class FPSController : MonoBehaviour
             if (!animator.GetBool("Walk"))
             {
                 animator.SetBool("Walk", true);
+
+                // 適切な場所で呼び出す
+                PlayerWalkFootStep(WalkFootStepSE);
             }
         }
         else if (animator.GetBool("Walk"))
         {
             animator.SetBool("Walk", false);
+
+            StopFootStep();
         }
 
         if (z > 0 && Input.GetKey(KeyCode.LeftShift))
@@ -124,12 +136,17 @@ public class FPSController : MonoBehaviour
             {
                 animator.SetBool("Run", true);
                 speed = 0.25f;
+
+                // 適切な場所で呼び出す
+                PlayerRunFootStep(RunFootStepSE);
             }
         }
         else if (animator.GetBool("Run"))
         {
             animator.SetBool("Run", false);
             speed = 0.1f;
+
+            StopFootStep();
         }
 
         // アップデートで右クリック検知してカメラを切り替える
@@ -198,5 +215,39 @@ public class FPSController : MonoBehaviour
         q.x = Mathf.Tan(angleX * Mathf.Deg2Rad * 0.5f);
 
         return q;
+    }
+
+    // 実際に音を出す関数の作成
+    public void PlayerWalkFootStep(AudioClip clip)
+    {
+        playerFootStep.loop = true;
+
+        playerFootStep.pitch = 1f;
+
+        playerFootStep.clip = clip;
+
+        playerFootStep.Play();
+    }
+
+    // 実際に音を出す関数の作成
+    public void PlayerRunFootStep(AudioClip clip)
+    {
+        playerFootStep.loop = true;
+
+        playerFootStep.pitch = 1.3f;
+
+        playerFootStep.clip = clip;
+
+        playerFootStep.Play();
+    }
+
+    // 実際に音を出す関数の作成
+    public void StopFootStep()
+    {
+        playerFootStep.Stop();
+
+        playerFootStep.loop = false;
+
+        playerFootStep.pitch = 1f;
     }
 }
