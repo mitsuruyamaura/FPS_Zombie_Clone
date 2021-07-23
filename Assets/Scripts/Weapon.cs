@@ -14,6 +14,7 @@ public class Weapon : MonoBehaviour
 
     private void Awake()
     {
+        // Weaponのinstanceの中が空なら自分自身を入れる
         if (instance == null)
         {
             instance = this;
