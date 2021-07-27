@@ -12,6 +12,12 @@ public class Weapon : MonoBehaviour
     // staticをつけてどこからでも呼び出せるようにする
     public static Weapon instance;
 
+    // Weapon
+    // 変数作成
+    public Transform shotDirection;
+
+    
+
     private void Awake()
     {
         // Weaponのinstanceの中が空なら自分自身を入れる
@@ -30,7 +36,7 @@ public class Weapon : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        Debug.DrawRay(shotDirection.position, shotDirection.transform.forward * 10, Color.green);
     }
 
     public void CanShoot()
@@ -57,6 +63,25 @@ public class Weapon : MonoBehaviour
         {
             weapon.clip = triggerSE;
             weapon.Play();
+        }
+    }
+
+    // 当たり判定のレーザーを飛ばす関数を作成
+    public void Shooting()
+    {
+        RaycastHit hitInfo;
+
+        // outをつけることで中身が空のものも引数として渡すことができる
+        // 中身が空だけどこの先の処理で値が入るという宣言
+        if (Physics.Raycast(shotDirection.transform.position, shotDirection.transform.forward, out hitInfo, 300))
+        {
+            if (hitInfo.collider.gameObject.GetComponent<ZombieController>() != null)
+            {
+                // ZimbieControllerを格納するために同じ型の変数を宣言する
+                ZombieController hitZombie = hitInfo.collider.gameObject.GetComponent<ZombieController>();
+
+                hitZombie.ZombieDeath();
+            }
         }
     }
 }

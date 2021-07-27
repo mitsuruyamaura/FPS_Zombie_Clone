@@ -250,4 +250,20 @@ public class FPSController : MonoBehaviour
 
         playerFootStep.pitch = 1f;
     }
+
+    // FPSController
+    // HPを減らす関数を作成する
+    public void TakeHit(float damage)
+    {
+        // 何もしないと左と右で型が違うためエラーが出るため
+        // playerHPがint型なので、Mathfの前に(int)とすることでint型にできる
+        playerHP = (int)Mathf.Clamp(playerHP - damage, 0, playerHP);
+
+        hpBer.value = playerHP;
+
+        if (playerHP <= 0 && !GameState.GameOver)
+        {
+            GameState.GameOver = true;
+        }
+    }
 }

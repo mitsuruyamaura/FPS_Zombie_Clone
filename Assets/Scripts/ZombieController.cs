@@ -19,11 +19,9 @@ public class ZombieController : MonoBehaviour
     GameObject target;
     public float runSpeed;
 
-    // プレイヤーとの距離関数を作成
-    // 発見判定関数作成
-    // 見失ったか判定する関数
-
-    // 列挙型にコードを追加記述
+    // ZombieController
+    // 変数の作成(攻撃力)
+    public int attackDamage;
 
     // スタート時に変数にコンポーネントを格納
     void Start()
@@ -45,11 +43,17 @@ public class ZombieController : MonoBehaviour
         animator.SetBool("Attack", false);
     }
 
+    // プレイヤーとの距離関数を作成
     float DistanceToPlayer()
     {
+        if (GameState.GameOver)
+        {
+            return Mathf.Infinity;
+        }
         return Vector3.Distance(target.transform.position, transform.position);
     }
 
+    // 発見判定関数作成
     bool CanSeePlayer()
     {
         if (DistanceToPlayer() < 15)
@@ -60,6 +64,7 @@ public class ZombieController : MonoBehaviour
         return false;
     }
 
+    // 見失ったか判定する関数
     bool ForGetPlayer()
     {
         if (DistanceToPlayer() > 20)
@@ -70,7 +75,24 @@ public class ZombieController : MonoBehaviour
         return false;
     }
 
-    // Update is called once per frame
+    // 攻撃関数を作成
+    public void DamagePlayer()
+    {
+        if(target != null)
+        {
+            target.GetComponent<FPSController>().TakeHit(attackDamage);
+        }
+    }
+
+    // ZombieController
+    // 死んだ時の関数
+    public void ZombieDeath()
+    {
+        TurnOffTrigger();
+        animator.SetBool("Death", true);
+        state = STATE.DEAD;
+    }
+
     void Update()
     {
         // switch文はcaseの部分で分岐してstate変数がどのSTATEに当てはまるか確認する
@@ -121,7 +143,19 @@ public class ZombieController : MonoBehaviour
 
                 break;
 
+            // 列挙型にコードを追加記述
             case STATE.CHASE:
+
+                // 列挙型にコード記述
+                if (GameState.GameOver)
+                {
+                    TurnOffTrigger();
+                    agent.ResetPath();
+                    state = STATE.WANDER;
+
+                    return;
+                }
+
                 agent.SetDestination(target.transform.position);
                 agent.stoppingDistance = 3;
 
@@ -130,11 +164,44 @@ public class ZombieController : MonoBehaviour
                 agent.speed = runSpeed;
                 animator.SetBool("Run", true);
 
+                if (agent.remainingDistance <= agent.stoppingDistance)
+                {
+                    state = STATE.ATTACK;
+                }
+
                 if (ForGetPlayer())
                 {
                     agent.ResetPath();
                     state = STATE.WANDER;
                 }
+
+                break;
+
+            case STATE.ATTACK:
+                if (GameState.GameOver)
+                {
+                    TurnOffTrigger();
+                    agent.ResetPath();
+                    state = STATE.WANDER;
+
+                    return;
+                }
+                TurnOffTrigger();
+                animator.SetBool("Attack", true);
+
+                transform.LookAt(new Vector3(target.transform.position.x, transform.position.y, target.transform.position.z));
+
+                if (DistanceToPlayer() > agent.stoppingDistance +2)
+                {
+                    state = STATE.CHASE;
+                }
+
+                break;
+
+            // 列挙型にコード記述
+            case STATE.DEAD:
+
+                Destroy(agent);
 
                 break;
         }
