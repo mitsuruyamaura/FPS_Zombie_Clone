@@ -16,8 +16,6 @@ public class Weapon : MonoBehaviour
     // 変数作成
     public Transform shotDirection;
 
-    
-
     private void Awake()
     {
         // Weaponのinstanceの中が空なら自分自身を入れる
@@ -75,12 +73,34 @@ public class Weapon : MonoBehaviour
         // 中身が空だけどこの先の処理で値が入るという宣言
         if (Physics.Raycast(shotDirection.transform.position, shotDirection.transform.forward, out hitInfo, 300))
         {
+            // Weapon
+            // ゾンビの死亡をアニメーションかラグドールのどちらかにする
+            // GameObjectを格納する為の変数を作成
+            // レーザーで何かゲームオブジェクトに当たった時にそれを格納する
+            GameObject hitGameObject = hitInfo.collider.gameObject;
+
             if (hitInfo.collider.gameObject.GetComponent<ZombieController>() != null)
             {
                 // ZimbieControllerを格納するために同じ型の変数を宣言する
                 ZombieController hitZombie = hitInfo.collider.gameObject.GetComponent<ZombieController>();
+                if (Random.Range(0, 10) < 5)
+                {
+                    // 一部のhitZombieをhitGameObjectに変更
+                    hitZombie.ZombieDeath();
 
-                hitZombie.ZombieDeath();
+                    GameObject rgPrefab = hitZombie.ragdoll;
+
+                    GameObject NewRD = Instantiate(rgPrefab, hitGameObject.transform.position, hitGameObject.transform.rotation);
+
+                    NewRD.transform.Find("Hips").GetComponent<Rigidbody>().AddForce(shotDirection.transform.forward * 5000);
+
+                    // ぶつかったGameObjectを削除
+                    Destroy(hitGameObject);
+                }
+                else
+                {
+                    hitZombie.ZombieDeath();
+                }
             }
         }
     }

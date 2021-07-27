@@ -42,6 +42,16 @@ public class FPSController : MonoBehaviour
     public AudioSource playerFootStep;
     public AudioClip WalkFootStepSE, RunFootStepSE;
 
+    // FPSController
+    // 変数を作成(スピーカー、音)
+    public AudioSource voise,  impact;
+    public AudioClip hitVoiseSE, HitImpactSE;
+
+    
+
+    // 作成した関数を呼ぶ(攻撃食らった時に呼ぶ関数)
+
+
     // スタート時に体力を体力バーに反映
     // リロードと弾薬の所でテキストを反映する
     void Start()
@@ -261,9 +271,32 @@ public class FPSController : MonoBehaviour
 
         hpBer.value = playerHP;
 
+        ImpactSE();
+
+        if (Random.Range(0, 10) < 6)
+        {
+            VoiseSE(hitVoiseSE);
+        }
+
         if (playerHP <= 0 && !GameState.GameOver)
         {
             GameState.GameOver = true;
         }
     }
+
+    // 関数作成(攻撃を食らったときの音、声)
+    public void VoiseSE(AudioClip clip)
+    {
+        voise.Stop();
+
+        voise.clip = clip;
+        voise.Play();
+    }
+
+    public void ImpactSE()
+    {
+        voise.clip = HitImpactSE;
+        voise.Play();
+    }
+
 }

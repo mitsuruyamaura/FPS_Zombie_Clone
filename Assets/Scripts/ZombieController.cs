@@ -23,6 +23,21 @@ public class ZombieController : MonoBehaviour
     // 変数の作成(攻撃力)
     public int attackDamage;
 
+    // ZombieController
+    // ラグドールを格納する変数を作成
+    public GameObject ragdoll;
+
+    // ZombieController
+    // 変数を作成(スピーカー、音)
+    public AudioSource zomVoise;
+    public AudioClip howl, attack;
+
+    
+
+    // 作成した関数を呼ぶ(スタート : ダメージ関数)
+
+    
+
     // スタート時に変数にコンポーネントを格納
     void Start()
     {
@@ -33,6 +48,8 @@ public class ZombieController : MonoBehaviour
         {
             target = GameObject.FindGameObjectWithTag("Player");
         }
+
+        Howl();
     }
 
     public void TurnOffTrigger()
@@ -80,6 +97,7 @@ public class ZombieController : MonoBehaviour
     {
         if(target != null)
         {
+            AttackSE();
             target.GetComponent<FPSController>().TakeHit(attackDamage);
         }
     }
@@ -91,6 +109,22 @@ public class ZombieController : MonoBehaviour
         TurnOffTrigger();
         animator.SetBool("Death", true);
         state = STATE.DEAD;
+    }
+
+    // 関数作成(唸り声用、攻撃時用)
+    public void Howl()
+    {
+        if (!zomVoise.isPlaying)
+        {
+            zomVoise.clip = howl;
+            zomVoise.Play();
+        }
+    }
+
+    public void AttackSE()
+    {
+        zomVoise.clip = attack;
+        zomVoise.Play();
     }
 
     void Update()
@@ -109,6 +143,11 @@ public class ZombieController : MonoBehaviour
                 else if(Random.Range(0, 100) < 5)
                 {
                     state = STATE.WANDER;
+                }
+
+                if (Random.Range(0, 100) < 5)
+                {
+                    Howl();
                 }
 
                 break;
@@ -139,6 +178,11 @@ public class ZombieController : MonoBehaviour
                 if (CanSeePlayer())
                 {
                     state = STATE.CHASE;
+                }
+
+                if (Random.Range(0, 100) < 5)
+                {
+                    Howl();
                 }
 
                 break;
@@ -194,12 +238,15 @@ public class ZombieController : MonoBehaviour
                 if (DistanceToPlayer() > agent.stoppingDistance +2)
                 {
                     state = STATE.CHASE;
+                    Howl();
                 }
 
                 break;
 
             // 列挙型にコード記述
             case STATE.DEAD:
+
+                zomVoise.Stop();
 
                 Destroy(agent);
 
